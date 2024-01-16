@@ -1,18 +1,14 @@
-{ pkgs ? import <nixpkgs> {} }:
-let
-  my-python = pkgs.python3;
-  python-with-my-packages = my-python.withPackages (p: with p; [
-    dbus-python
-    # other python packages you want
-  ]);
-in
-pkgs.mkShell {
-  buildInputs = with pkgs; [
-    libsForQt5.kdialog
-    python-with-my-packages
-    # other dependencies
-  ];
-  shellHook = ''
-    PYTHONPATH=${python-with-my-packages}/${python-with-my-packages.sitePackages}
-    '';
-}
+(
+  import
+  (
+    let
+      lock = builtins.fromJSON (builtins.readFile ./flake.lock);
+    in
+      fetchTarball {
+        url = lock.nodes.flake-compat.locked.url or "https://github.com/edolstra/flake-compat/archive/${lock.nodes.flake-compat.locked.rev}.tar.gz";
+        sha256 = lock.nodes.flake-compat.locked.narHash;
+      }
+  )
+  {src = ./.;}
+)
+.shellNix
